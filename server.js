@@ -27,6 +27,18 @@ function getColorArr (index) {
   }
 }
 
+//发送对手名字
+function sendOther(zhuohao) {
+  for (let i = 0; i < userArr[zhuohao].users.length; i++) {
+    let name = userArr[zhuohao].users[i]
+    arr[name].sendText(JSON.stringify({
+      code: 208, //设置发送对手名字的code为208
+      username: name,
+      text: userArr[zhuohao].users[1 - i] //对手的名字
+    }))
+  }
+}
+
 //发送对手信息和棋子颜色
 function sendQZColor(zhuohao) {
   let colorArr = getColorArr(zhuohao)
@@ -86,6 +98,7 @@ const server = ws.createServer(function(socket) {
     code: 202 发送对手名字和棋子颜色
     code: 204 发送棋子位置
     code: 206 发送桌子占用情况
+    code: 208 发送对手名字
     code: 500 发送连接失败字符串
     */
     if (mes === 'link') { //连接
@@ -110,7 +123,7 @@ const server = ws.createServer(function(socket) {
           text: '连接成功'
         }))
         if (userArr[zhuohao].users.length === 2) { //如果2个用户齐了,就通知另一个用户
-          sendQZColor(zhuohao)
+          sendOther(zhuohao)
         }
       } else {
         console.log('该桌玩家已满,请换一桌进行游戏')
