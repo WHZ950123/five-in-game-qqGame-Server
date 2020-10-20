@@ -93,12 +93,18 @@ const server = ws.createServer(function(socket) {
     situp: 离开桌子
     close: 关闭连接
     reBegin: 重新开局
+    huiqi: 悔棋
+    wantToHuiqi: 请求悔棋
+    okToHuiqi: 对手同意悔棋
     发送给客户端的信息:
     code: 200 发送连接成功字符串
     code: 202 发送对手名字和棋子颜色
     code: 204 发送棋子位置
     code: 206 发送桌子占用情况
     code: 208 发送对手名字
+    code: 210 悔棋
+    code: 212 询问是否允许对方悔棋设为
+    code: 214 同意悔棋设为
     code: 500 发送连接失败字符串
     */
     if (mes === 'link') { //连接
@@ -162,9 +168,43 @@ const server = ws.createServer(function(socket) {
           }
           return
         }
+        if (mes === 'wantToHuiqi') { //请求悔棋
+          userArr[zhuohao].users.forEach(item => {
+            if (item !== username) {
+              arr[item].sendText(JSON.stringify({
+                code: 212, //询问是否允许对方悔棋设为212
+                username: item,
+                text: data.huiqiColor
+              }))
+            }
+          })
+          return
+        }
+        if (mes === 'okToHuiqi') { //对手同意悔棋
+          userArr[zhuohao].users.forEach(item => {
+            if (item !== username) {
+              arr[item].sendText(JSON.stringify({
+                code: 214, //同意悔棋设为214
+                username: item,
+                text: data.huiqiColor
+              }))
+            }
+          })
+          return
+        }
+        if (mes === 'huiqi') { //悔棋
+          userArr[zhuohao].users.forEach(item => { //给该桌号的玩家发送悔棋信息
+            arr[item].sendText(JSON.stringify({ //发消息只能是字符串或者buffer
+              code: 210, //悔棋设为210
+              username: item,
+              text: data.huiqiColor
+            }))
+          })
+          return
+        }
         userArr[zhuohao].users.forEach(item => { //给该桌号的玩家发送棋子位置信息
           arr[item].sendText(JSON.stringify({ //发消息只能是字符串或者buffer
-            code: 204,  //发送棋子位置设为204
+            code: 204, //发送棋子位置设为204
             username: item,
             text: mes
           }))
